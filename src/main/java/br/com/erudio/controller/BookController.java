@@ -3,6 +3,7 @@ package br.com.erudio.controller;
 import br.com.erudio.dto.Exchange;
 import br.com.erudio.environment.InstanceInformationService;
 import br.com.erudio.model.Book;
+import br.com.erudio.proxy.ExchangeProxy;
 import br.com.erudio.repository.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -25,25 +26,41 @@ public class BookController {
     @Autowired
     private BookRepository repository;
 
+    @Autowired
+    private ExchangeProxy proxy;
+
     @GetMapping(value = "/{id}/{currency}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Book findBook(@PathVariable Long id, @PathVariable String currency) {
         String port = informationService.retrieverServerPort();
         var book = repository.findById(id).orElseThrow();
 
-        // Fazendo a requisição na outra API (sem ser pelo Feign)
-        HashMap<String, String> params = new HashMap<>();
-        params.put("amount", book.getPrice().toString());
-        params.put("from", "USD");
-        params.put("to", currency);
-        var response = new RestTemplate()
-                .getForEntity("http://localhost:8000/exchange-service/" + "{amount}/{from}/{to}", Exchange.class, params);
-        Exchange exchange = response.getBody();
+        Exchange exchange = proxy.getExchange(book.getPrice(), "USD", currency);
         
-        book.setEnvironment(port);
+        book.setEnvironment(port + " FEIGN");
         book.setPrice(exchange.getConvertedValue());
         book.setCurrency(currency);
         return book;
     }
+
+//    @GetMapping(value = "/{id}/{currency}", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public Book findBook(@PathVariable Long id, @PathVariable String currency) {
+//        String port = informationService.retrieverServerPort();
+//        var book = repository.findById(id).orElseThrow();
+//
+//        // Fazendo a requisição na outra API (sem ser pelo Feign)
+//        HashMap<String, String> params = new HashMap<>();
+//        params.put("amount", book.getPrice().toString());
+//        params.put("from", "USD");
+//        params.put("to", currency);
+//        var response = new RestTemplate()
+//                .getForEntity("http://localhost:8000/exchange-service/" + "{amount}/{from}/{to}", Exchange.class, params);
+//        Exchange exchange = response.getBody();
+//
+//        book.setEnvironment(port);
+//        book.setPrice(exchange.getConvertedValue());
+//        book.setCurrency(currency);
+//        return book;
+//    }
 
 //    @GetMapping(value = "/{id}/{currency}", produces = MediaType.APPLICATION_JSON_VALUE)
 //    public Book findBook(@PathVariable Long id, @PathVariable String currency) {
