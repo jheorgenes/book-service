@@ -7,10 +7,27 @@ eureka:
       defaultZone: http://localhost:8761/eureka
 # Habilitando o resilience4j para quantidade de tentativas antes de falhar
 resilience4j:
+  # Limitando a quantidade de requisições permitidas por segundo
+  ratelimiter:
+    instances:
+      default:
+        limit-for-period: 2
+        limit-refresh-period: 10s
+  bulkhead:
+    instances:
+      default:
+        max-concurrent-calls: 10
+      foo-bar:
+        max-concurrent-calls: 20
   retry:
     instances:
       foo-bar:
+        # Quantidade de requisições
         max-attempts: 7
+        # Tempo de espera entre cada requisição
+        wait-duration: 1s
+        # Adiciona Fibonacci para tempo de requisição
+        enable-exponential-backoff: true
 spring:
   application:
     name: book-service
