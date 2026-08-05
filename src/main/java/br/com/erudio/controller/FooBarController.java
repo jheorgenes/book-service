@@ -18,11 +18,11 @@ public class FooBarController {
     private Logger logger = LoggerFactory.getLogger(FooBarController.class);
 
     @GetMapping("/foo-bar")
-//    @Retry(name = "foo-bar") //Declarando que esse método será observado pelo Retry e tentatá chamá-lo a quantidade de vezes especificada pelo resilience4j max-attempts
-//    @Retry(name = "foo-bar", fallbackMethod = "fallbackMethod") //Em caso de falha, chamará esse método abaixo cujo o nome é o mesmo declarado aqui
-//    @CircuitBreaker(name = "foo-bar", fallbackMethod = "fallbackMethod")
-//    @RateLimiter(name = "default") //Limitando a quantidade de requisições permitidas
-    @Bulkhead(name = "default")
+//    @Retry(name = "foo-bar") // Faz com que o Resilience4j tente executar este método novamente quando ocorrer uma exceção, conforme a configuração da instância "foo-bar".
+//    @Retry(name = "foo-bar", fallbackMethod = "fallbackMethod") //Depois que todas as tentativas falharem, chamará esse método abaixo cujo o nome é o mesmo declarado aqui.
+//    @CircuitBreaker(name = "foo-bar", fallbackMethod = "fallbackMethod") Monitora falhas consecutivas. Quando detectar muitas falhas, interrompe temporariamente novas chamadas para evitar sobrecarregar um serviço indisponível.
+//    @RateLimiter(name = "default") //Limita a quantidade de chamadas permitidas por período de tempo.
+    @Bulkhead(name = "default") // Limita quantas chamadas podem executar simultaneamente este método.
     public String fooBar() {
         logger.info("Request to foo-bar is received!");
 //        // Simulando uma requisição para uma rota que não existe, para falhar e observar o comportameno dessa falha no circuit breaker

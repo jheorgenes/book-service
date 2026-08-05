@@ -1,24 +1,27 @@
 server:
   port: 8100
-# Habilitando o eureka client e conectando ao servidor
+# Habilitando o eureka client e registrando-se no servidor Eureka
 eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka
 # Habilitando o resilience4j para quantidade de tentativas antes de falhar
 resilience4j:
-  # Limitando a quantidade de requisições permitidas por segundo
+  # Controla quantas requisições entram por unidade de tempo. (Só passa duas requisições a cada 10 segundos, pra evitar sobrecarga)
   ratelimiter:
     instances:
       default:
         limit-for-period: 2
         limit-refresh-period: 10s
+  # Controla quantas requisições estão sendo processadas simultaneamente.
   bulkhead:
     instances:
       default:
+        # 10 chamadas executando ao mesmo tempo
         max-concurrent-calls: 10
       foo-bar:
         max-concurrent-calls: 20
+  # Repete as requisições até a quantidade estipulada, antes de falhar completamente
   retry:
     instances:
       foo-bar:
@@ -26,8 +29,21 @@ resilience4j:
         max-attempts: 7
         # Tempo de espera entre cada requisição
         wait-duration: 1s
-        # Adiciona Fibonacci para tempo de requisição
+        # Adiciona o intervalo de tempo em exponencial
         enable-exponential-backoff: true
+#  circuitbreaker:
+#    instances:
+#      foo-bar:
+#        # O circuit Breaker olha para as últimas 10 chamadas
+#        sliding-window-size: 10
+#        # Porcentagem de chamadas que podem falhar
+#        failure-rate-threshold: 50
+#        # Quando reaberto, espera 10 segundos antes de testar novamente
+#        wait-duration-in-open-state: 10s
+#        # Libera 3 chamadas novas. Se obter sucesso, FECHA o circuit Breaker. Se falharem, ABRE novamente.
+#        permitted-number-of-calls-in-half-open-state: 3
+#        # Faz a transição automaticamente 
+#        automatic-transition-from-open-to-half-open-enabled: true
 spring:
   application:
     name: book-service
