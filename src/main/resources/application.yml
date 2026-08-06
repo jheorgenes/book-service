@@ -20,3 +20,11 @@ spring:
       hibernate:
     show-sql: false
     open-in-view: false
+# Alterando o caminho de acesso ao swagger
+springdoc:
+  api-docs:
+    path: /book-service/v3/api-docs
+  swagger-ui:
+    url: /book-service/v3/api-docs
+  # Força o servers do API Gateway corresponder a entrada da API Gateway
+  override-server-url: true
