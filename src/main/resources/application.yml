@@ -5,6 +5,9 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka
+  # Define como essa instância será anunciada no Eureka
+  instance:
+    prefer-ip-address: true
 spring:
   application:
     name: book-service
@@ -20,6 +23,13 @@ spring:
       hibernate:
     show-sql: false
     open-in-view: false
+# Configuração para o Zipkin
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+zipkin:
+  base-url: http://localhost:9411
 # Alterando o caminho de acesso ao swagger
 springdoc:
   api-docs:
